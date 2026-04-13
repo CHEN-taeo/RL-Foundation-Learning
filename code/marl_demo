@@ -1,0 +1,28 @@
+# 主题：单智能体追逐对抗
+# 时间: 2026.4.13
+# 作者：陈韬
+
+# 从pettingZoo库的MPE（Muti-Agent Particle Environments,多智能体粒子环境）模块中导入simple_tag_v3环境
+# 这是MARL领域最经典的“追逐-逃跑”测试环境，默认配置：3个红色追逐者（adversary）、一个绿色逃跑者（agent）、2个黑色障碍物
+from pettingzoo.mpe import simple_tag_v3
+
+# 环境初始化
+# render_mode="human"：开启可视化窗口，让你能看到色块在动。注意：真正训练时会关掉这个（改成“rab_array”）,只在测试/演示时开，因为渲染会拖慢训练速度
+env = simple_tag_v3.env(render_mode="human")
+# env.reset(seed=42):强化学习的核心第一步——重置环境
+# seed=42：随机种子，保证每次重置的初始位置都一样，方便复现结果
+env.reset(seed=42)# reset();重置游戏，把所有机器人放回初始位置
+
+# 智能体循环交互
+for agent in env.agent_iter():# 遍历智能体
+    observation, reward, termination, truncation, info = env.last()
+    # observation:周围的环境；reward：奖励得分；termination：是否结束；truncation：是否被截断（比如达到最大步数）；info：额外信息
+
+    if termination or truncation:
+        action = None #如果游戏结束，机器人停止行动，否则，机器人随机选择一个动作（上下左右移动）
+    else:
+        # 随机策略，仅用于演示
+        action = env.action_space(agent).sample()
+
+    env.step(action)# 执行动作，更新游戏状态
+env.close()# 关闭游戏窗口，结束演示
