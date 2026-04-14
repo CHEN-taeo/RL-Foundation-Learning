@@ -1,0 +1,25 @@
+# 主题：冰湖陷阱游戏开发
+# 时间： 2026.4.14
+# 作者： 陈韬
+
+# 引入库gymnasium,这是一个用于开发与比较强化学习算法的开源库
+import gymnasium as gym
+# 自定义环境，设置冰湖环境，is_slippery=False(不滑，降低难度）；render_mode=“human”(开启可视化窗口)
+env = gym.make("FrozenLake-v1",is_slippery=False,render_mode="human")
+s,_=env.reset()
+# reset不是一个独立的函数，需要加env.来标清来源，是是初始状态，_是额外信息（我们暂时不需要）
+
+step=0 # 初始化步数为0
+distance=0 # 初始化移动距离为0
+done = False
+# done表示结束，done = False表示游戏还没有结束，done = True表示游戏结束了
+while not done: # 用while循环来表示不确定步数，for循环常用在确定步数的情况下
+ a = env.action_space.sample() # 随机选择一个方向移动
+ # sample()方法用于从动作空间中随机采样一个动作，这里a是随机选择的动作
+ s_next,r,done,truncated,info = env.step(a) # 收集此时状态的环境情况
+ s=s_next # 更新状态，s_next是下一状态，r是奖励，a是动作,truncated表示是否被截断，info是额外信息
+ step+=1 # 步数加1
+ distance+=1 # 移动距离加1
+print ("行走数量",step)
+print ("移动距离",distance)
+env.close() # 关闭环境，结束游戏
