@@ -1,0 +1,58 @@
+# 主题：Q-table学习中的ε-greedy策略实现
+# 时间：2026.04.15
+# 作者：陈韬
+import numpy as np
+# 导入依赖库：numpy用于数值计算与矩阵生成
+
+def epsilon_greedy_policy(state, q_table, epsilon):
+    '''
+    ε-greedy策略实现函数(动作选择函数)
+    核心作用：解决强化学习【探索vs利用】的矛盾，平衡“随机试错积累经验”和“依赖经验拿稳奖励”
+    :param state: 智能体当前的状态（Q表的行列值）
+    :param q_table: np.array，一个二维Q表，存储智能体在一次次选择过程中未来预期获得的奖励/惩罚值，是一个【最优决策书册】
+    :param epsilon: float，探索概率，取值范围【0,1】，数值越大，智能体越倾向于随机探索
+    :return: int,智能体选择的动作索引
+    '''
+    rand_num= np.random.random()
+    # np.random.random()：生成一个0到1之间的随机数，用于与epsilon比较，决定是探索还是利用
+
+    if rand_num <= epsilon: # 根据随机数与epsilon的大小，执行对应的分支
+        action = np.random.choice(q_table.shape[1])
+        # 探索分支：随机选择所有可用动作的一个，q_table.shape[1]是Q表的列数，即动作总数
+
+    else:   # 利用分支：选择当前状态下Q表中预期奖励最高的动作
+        action =q_table[state].argmax() # argmax()返回最大值的索引
+
+
+    return action   # 最后输出选择的动作
+
+
+# ------------------- 测试脚本开始 -------------------
+
+test_q_table = np.zeros([5, 3]) # 创建一个行为5，列数为3的表格。全部初始值为0
+test_q_table[1] = [0.1, 0.5, 0.2]   # 把第二列的概率改为【0.1,0.5,0.2】
+
+print("测试Q表：")
+print(test_q_table)
+print("-" * 50)
+
+# 设立初始值，epsilon=1，test_state=1，test_round=0
+epsilon=1
+test_state = 1
+test_round=0
+while epsilon>=0:
+    #ε衰减测试：从1.0（完全探索）慢慢降到0.0（完全利用）
+
+    current_epsilon = round(epsilon,1)  # 保留一位小数，避免浮点数精度问题
+    print("第{:.1f}次测试，epsilon={:.1f}".format((1-epsilon)*10, epsilon))
+    for _ in range(5):  # 每次测试都随机选择5次动作，看看智能体在不同决策概率下的选择结果
+        action = epsilon_greedy_policy(test_state, test_q_table,epsilon )   # 输出状态空间与动作空间的值与，决策概率
+        print(f"第{_+1}次选的动作：{action}")
+
+    # 更新循环变量：先测当前epsilon，再递减，避免漏测epsilon=1.0
+    epsilon -= 0.1
+    test_round += 1
+    print("-" * 50)
+
+
+# ------------------- 测试脚本结束 -------------------
