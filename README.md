@@ -153,9 +153,9 @@ Q(s,a) \leftarrow Q(s,a) + \alpha \left[ r + \gamma \max_{a'}Q(s',a') - Q(s,a) \
 
 | 日期 | 内容 |
 |------|------|
-| 2026.4.13 | 新增 `marl_demo.py`，跑通 PettingZoo MPE 追逐环境 |
-| 2026.4.14 | 新增 `FrozenLake_v1.py`，完成 Gymnasium 基础交互循环 |
-| 2026.4.14 | 归档环境搭建笔记与 Day1 五元组理解 |
+| 2026.04.13 | 新增 `marl_demo.py`，跑通 PettingZoo MPE 追逐环境 |
+| 2026.04.14 | 新增 `FrozenLake_v1.py`，完成 Gymnasium 基础交互循环 |
+| 2026.04.14 | 归档环境搭建笔记与 Day1 五元组理解 |
 | 2026.04.15 | 新增 `Q-table.py`，实现ε-greedy策略及完整测试脚本 |
 | 2026.04.16 | 新增 `Q_learning_update.py`，完成贝尔曼更新公式代码落地 |
 | 2026.04.16 | 归档Q-learning核心概念解析笔记，建立理论-代码映射 |
