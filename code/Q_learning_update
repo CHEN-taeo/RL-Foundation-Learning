@@ -1,0 +1,49 @@
+# 主题：Q_learning贝尔曼更新公式的完整代码落地
+# 时间：2026-04-16
+# 作者：陈韬
+
+import numpy as np
+# 引入numpy库，创建一个Q表
+Q_table = np.zeros([5,3])
+# 创建一个Q表，为5*3的格子
+
+'''
+定义一个函数epsilon策略：
+核心逻辑：
+1.随机生成一个数值，判断它与epsilon（探索概率）的大小比较
+2.分支1：大于（>）:利用，选择之前的最优动作
+3.分支2：小于（<）:探索，寻找另外的路线，在所有动作中随机选择一个
+4.返回：最后返回动作
+'''
+def epsilon_greedy_policy(Q_table,state,epsilon):
+    rand_num =np.random.random()
+    if rand_num > epsilon:
+        action = np.argmax(Q_table[state])
+    else:
+        action = np.random.choice(3)
+    return action
+
+# 定义贝尔曼更新公式Q_learning_update函数：
+'''
+核心逻辑：
+1.预测下一动作的最大未来奖励累计值max(Q[s_next])
+2.下一动作的预测值-此时状态的实际值Q[s,a]，为估值与实际值的差值
+3.【2】*y.(对未来的奖励值打折）
+4.【3】*a.避免一些偶然误差影响Q表
+5.最后把【4】的结果加到当前状态动作的Q值上，完成更新
+'''
+def Q_learning_update(Q_table,state,action,reward,s_next,a,y):
+    Q_table[state, action] += a * (reward + y * np.max(Q_table[s_next]) - Q_table[state, action])
+# __________________________________测试代码______________________________
+
+s=1
+s_next=2
+r=1
+a=0.1
+y=0.9
+epsilon=0.3
+# 定义测试参数
+
+action = epsilon_greedy_policy(Q_table,s,epsilon)
+Q_learning_update(Q_table,s,action,r,s_next,a,y)
+print("更新后的Q表：",Q_table)
