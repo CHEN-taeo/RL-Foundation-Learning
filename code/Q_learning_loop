@@ -1,12 +1,30 @@
 # 主题：单智能体循环训练
 # 时间：2026-04-17
 # 作者：陈韬
+'''
+【基准对照组】
+alpha=0.1
+gamma=0.9
+epsilon=0.1（固定值，无衰减）
+max_episodes=1000
+max_step_per_episode=100
+环境：FrozenLake-v1, is_slippery=False
+'''
 
 # 1.  导入必要的库（比如gym、numpy、tensorboard的SummaryWriter）
 import numpy as np
 import gymnasium as gym
 # from tensorboard import SummaryWriter
-
+import matplotlib.pyplot as plt
+import random # 固定所有随机数种子，保证结果可以复现
+random.seed(42)# 固定Python内置随机数种子
+np.random.seed(42)# 固定numpy随机数种子
+# 固定gymnasium环境的随机数种子（在env.reset()和env.step()里生效）
+# 3.  初始化环境（比如我们的小车巡检栅格环境）
+env = gym.make("FrozenLake-v1",is_slippery=False,render_mode="")
+# 假设我们有一个自定义的环境叫Frozenlake-v1
+env.action_space.seed(42)
+env.observation_space.seed(42)
 # 2.  初始化超参数：alpha=0.1, gamma=0.9, epsilon=0.1, max_episodes=1000, max_steps_per_episode=100
 alpha=0.1
 gamma=0.9
@@ -14,14 +32,14 @@ epsilon=0.1
 max_episodes=1000
 max_step_per_episode=100
 
-# 3.  初始化环境（比如我们的小车巡检栅格环境）
-env = gym.make("FrozenLake-v1")  # 假设我们有一个自定义的环境叫agentgames-v0
 # 4.  初始化Q表：全0，行数=状态数，列数=动作数
 Q_table = np.zeros([env.observation_space.n,env.action_space.n])
 # 5.  初始化all_rewards列表，用来存每个episode的总reward
 all_rewards=[]
 # 在超参数下面加一行（第20行左右）
 # checkpoint_states = [10, 20, 30]  # 假设的巡检点状态
+epsilon_decay = 0.995  # 每次训练后，epsilon乘以0.995，慢慢变小
+min_epsilon = 0.01  # epsilon最小降到0.01，保留一点探索
 # 6.  初始化TensorBoard的SummaryWriter
 # writer = SummaryWriter()    # 原来：writer = SummaryWriter;Summarywriter相当于是图纸，你不能用图纸来画画，所以在SummaryWriter的后面要加上一个括号（）
 # 7.  开始外层循环：
@@ -78,11 +96,30 @@ for episode in range(max_episodes):
             break
     # 7.5 把当前episode的total_reward加入all_rewards列表
     all_rewards.append(total_reward)
+    # 让epsilon慢慢衰减
+    epsilon = max(min_epsilon, epsilon * epsilon_decay)
     # 7.6 【记录】每100个episode算平均并记录：
     if episode % 100 == 0:
         avg_reward =np.mean(all_rewards[-100:])
-        print(f"Episode {episode}, Average Reward: {avg_reward}")
+        print("Episode {}, Average Reward: {:.2f}".format (episode,avg_reward))
         # writer.add_scalar("Average Reward/100 Episodes", avg_reward, episode)
 # 8.  训练结束，关闭TensorBoard的writer
 # writer.close()
 # 9.  保存Q表，保存all_rewards的曲线截图到GitHub
+# 画reward曲线
+plt.figure(figsize=(10, 5))
+plt.plot(all_rewards, label='Episode Reward', alpha=0.5)  # alpha=0.5让曲线半透明，不那么乱
+# 画每100个episode的平均reward曲线（更平滑）
+avg_rewards = []
+window_size = 100
+for i in range(len(all_rewards) - window_size + 1):
+    avg_rewards.append(np.mean(all_rewards[i:i+window_size]))
+plt.plot(range(window_size, len(all_rewards)+1), avg_rewards, label=f'Average Reward ({window_size} Episodes)', linewidth=2, color='red')
+plt.xlabel('Episode')
+plt.ylabel('Total Reward')
+plt.title('Q-Learning Training on FrozenLake-v1')
+plt.legend()
+plt.grid(True)
+# 保存图片
+plt.savefig('q_learning_frozenlake.png')
+plt.show()
