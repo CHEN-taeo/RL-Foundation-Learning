@@ -1,0 +1,29 @@
+# 主题：Day1：手写DQN网络结构
+# 时间： 2026-04-21
+# 作者：陈韬
+# 功能：这段代码的作用是创建一个简单的深度Q网络（DQN）结构，用于强化学习任务。具体来说，他可以帮助智能体（比如机器人或游戏中的角色）在环境中做出更好的决策，从而获得更高的奖励。
+
+
+import torch
+# torch库在强化学习上拥有丰富的工具与学习库，同时具备易调与灵活性和丰富的社区资源，所以已经成为强化学习研究的主流框架。torch库天然适配机器人开发，首先是Pytorch可通过混合开发模式（Python算法+C++控制）完美平衡算法灵活性与控制效率，还有同时支持CPU、GPU等多种硬件设备，可轻松部署到机器人嵌入式开发系统.
+from torch import nn
+# nn是PyTorch官方的神经网络标准零件库，里面放的是Linear、ReLU、conv2d这些神经网络都通用的标准零件
+class SimpleDQN(nn.Module): # net = simpleDQN():实例化网络，相当于正式开一家simpleDQN奶茶店。 因为通过继承nn.module，开发者可以定义自己的神经网络类，这相当于是固定框架。同时nn.module可以提供可训练的层，包含权重参数，自动管理参数和设备。
+    def __init__(self): # 开启流水线之前的准备，self代表实例化出来的网络对象本身，就像“开的这家奶茶店的本身”
+
+        super().__init__()  # super().相当于是官方的装配体模板，能够调用父类nn.Module的初始化方法，加载父类提供的核心功能：自动微分、参数管理、模型保存加载、设备迁移（CPU/GPU）
+        self.fc1=nn.Linear(4,128)#  Linear是连接器，帮助连接个个层，但是在连接的过程中不要牛头不对马嘴，就像是传动装置，首先是你的管子能够插进对方的孔里严丝合缝。
+        self.relu1=nn.ReLU()# ReLU是单向器
+        self.fc2=nn.Linear(128,128)
+        self.relu2=nn.ReLU()
+        self.fc3=nn.Linear(128,2)# 输入是4个维度，输出是2个动作，所以是in_features:4.最后out_features:2
+
+    def forward(self,x):    # forward()。相当于是奶茶的制作流程，同时接收店长（self）与顾客（x）的要求
+        x=self.fc1(x)
+        x=self.relu1(x)
+        x=self.fc2(x)
+        x=self.relu2(x)
+        x=self.fc3(x)
+        return x    # 最后交给用户要的奶茶，返回x值
+net = SimpleDQN()
+print(net)   # 打印网络的结构布局，检查是否正确
