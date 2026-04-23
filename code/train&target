@@ -1,0 +1,15 @@
+import torch
+
+def train(network,buffer,optimiser,batch_size=32,gamma=0.99):
+    states,actions,rewards,next_states,dones = buffer.sample(batch_size)
+    states =torch.tensor(states,dtype=torch.float32)
+    next_states=torch.tensor(next_states,dtype=torch.float32)
+    actions=torch.tensor(actions,dtype=torch.long)
+    rewards=torch.tensor(rewards,dtype=torch.float32)
+    dones=torch.tensor(dones,dtype=torch.float32)
+
+    q_values=network(states)
+    actions_unsqueezed=actions.unsqueeze(1)
+    current_q=q_values.gather(1,actions_unsqueezed)
+
+    
