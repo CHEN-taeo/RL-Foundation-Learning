@@ -1,0 +1,73 @@
+# 主题：深度 Q 网络（Deep Q-Network，简称 DQN）算法的核心训练函数（train ()）完整实现
+# 时间：2026-04-23——2026-04-24
+# 作者：陈韬
+import torch
+# torch库常用于准确数字计算。
+# 用改作业类比，你是学生，网络是你的“答题本”。target_q是“标准答案”
+
+def train(network,buffer,optimiser,batch_size=32,gamma=0.99):
+    states,actions,rewards,next_states,dones = buffer.sample(batch_size)    # batch批次的意思。
+    states =torch.tensor(states,dtype=torch.float32)    # tensor是转换的意思，因为神经网络（network）只能听懂“pytorch语言”，所以要翻译一下。
+    next_states=torch.tensor(next_states,dtype=torch.float32)
+    actions=torch.tensor(actions,dtype=torch.long)
+    rewards=torch.tensor(rewards,dtype=torch.float32)
+    dones=torch.tensor(dones,dtype=torch.float32)
+    '''
+    states/next_states/rewards/dones：这些是 “连续的数值”（比如小车的位置是 0.5，奖励是 1.0），所以必须用浮点数（float32）。
+    actions：这些是 “离散的索引”（比如 0 代表向左，1 代表向右），所以必须用整数（long）—— 如果你用浮点数，gather 函数会直接报错，因为它没法用 “0.5” 来索引。
+    '''
+    q_values=network(states)    # 算出“每个状态下，所有动作的预估得分”
+    actions_unsqueezed=actions.unsqueeze(1) # 把实际选的动作整理成能够对应的格式
+    current_q=q_values.gather(1,actions_unsqueezed) # 精准提取你实际选的动作的预估得分
+
+    with torch.no_grad():   # 用torch.no_grad()给“标准答案（q_values）”套上保护罩，避免以后被修改
+        next_q_values=network(next_states)   # 相当于是改作业，看看学生写的对不对
+        q_max_values=next_q_values.max(dim=1)[0]  # 我们要的是在该状态下做出所有动作中的最优动作，所以需要用max（）来获取所有动作中未来获得奖励最多的动作。[0]是因为max（）会返回两个值，一个就是最大值，一个就是最大值的索引。我们只需要最大值
+        q_target=rewards+gamma*q_max_values*(1-dones)   #贝尔曼公式计算，当前状态获得的奖励加上未来获得的奖励累计值，乘上gamma是对未来的打折，再乘上（1-dones）是为了在最后结束时不多加上一个没有的未来奖励值
+    q_target_unsqueezed=q_target.unsqueeze(1)   # 把一维转化成二维，通过unsqueeze(松开）每列旁边加上一个空位置转化成行，能够一一对应
+
+    criterion=torch.nn.MSELoss()    # 均分误差（MSE）损失，每道题的差值平方，后取平均值
+    loss = criterion(current_q,q_target_unsqueezed)  # 扣分：自己答案与参考答案之间的差距，总共扣的分
+
+    optimiser.zero_grad()   # 更新笔记，老师把上一次的笔记擦掉，避免后面的笔记搞混
+    loss.backward() # 给你讲解错题搞懂
+    optimiser.step()    # 根据老师的讲解重新纠错
+    return loss.item()  # 返回你这次得到的总分
+    print(loss.item())
+
+
+# ---------------- 极简测试框架（仅用于测试打印loss） ----------------
+# 1. 先定义一个极简的Q网络（只有一层线性层，仅用于测试）
+class SimpleQNetwork(torch.nn.Module):
+    def __init__(self, state_dim=4, action_dim=2):
+        super().__init__()
+        self.fc = torch.nn.Linear(state_dim, action_dim)
+
+    def forward(self, x):
+        return self.fc(x)
+
+
+# 2. 定义一个极简的经验回放池（仅用于测试，随便生成点假数据）
+class SimpleReplayBuffer:
+    def __init__(self):
+        self.size = 1000
+
+    def sample(self, batch_size):
+        # 随便生成点假数据，仅用于测试
+        states = [[0.1, 0.2, 0.3, 0.4] for _ in range(batch_size)]
+        actions = [0 if i % 2 == 0 else 1 for i in range(batch_size)]
+        rewards = [1.0 for _ in range(batch_size)]
+        next_states = [[0.5, 0.6, 0.7, 0.8] for _ in range(batch_size)]
+        dones = [0.0 for _ in range(batch_size)]
+        return states, actions, rewards, next_states, dones
+
+
+# 3. 初始化所有组件
+network = SimpleQNetwork()
+buffer = SimpleReplayBuffer()
+optimiser = torch.optim.Adam(network.parameters(), lr=1e-3)
+
+# 4. 调用一次train()函数，并打印loss
+print("开始测试train()函数...")
+loss = train(network, buffer, optimiser, batch_size=32, gamma=0.99)
+print(f"✅ 测试成功！当前Loss值: {loss}")
