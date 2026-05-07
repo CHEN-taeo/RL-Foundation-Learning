@@ -1,4 +1,4 @@
-# DQN CartPole-v3
+# DQN CartPole-v1
 
 ## 这个项目是什么
 ### 小车倒立摆：
@@ -13,7 +13,7 @@
 <img width="604" height="460" alt="Screenshot 2026-05-07 124015" src="https://github.com/user-attachments/assets/92b5145d-c498-4760-8696-aea54ec3b3de" />
 <img width="2004" height="1334" alt="Screenshot 2026-05-07 112039" src="https://github.com/user-attachments/assets/7f57808c-f4ed-46f5-8e2a-b864e259c573" />
 
-- CartPole-v3.py：核心程序，负责调用其他库
+- CartPole-v1.py：核心程序，负责调用其他库
 - train_target.py：辅助cartpole实现
 - ReplayBuffer.py：经验回收池，更新积累经验  
 - dqn_v0.py：策略选择等等
