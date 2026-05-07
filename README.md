@@ -15,13 +15,13 @@
 
 - CartPole-v3.py：核心程序，负责调用其他库
 - train_target.py：辅助cartpole实现
-- ReplayBuffer.py：经验回收池，更新积累经验
+- ReplayBuffer.py：经验回收池，更新积累经验  
 - dqn_v0.py：策略选择等等
 
 ## 收敛结果<img width="516" height="576" alt="Screenshot 2026-05-07 125110" src="https://github.com/user-attachments/assets/163b19be-bc3e-4a6b-aa83-fd3360bb6e75" />
 <img width="516" height="576" alt="Screenshot 2026-05-07 125110" src="https://github.com/user-attachments/assets/805a9091-2af1-40e6-9dda-7b3c1e6ed892" />
 <img width="2880" height="1920" alt="Screenshot 2026-05-06 114520" src="https://github.com/user-attachments/assets/c154bc5b-a49f-4108-884c-c2406d9b25c1" />
-
+从episode 100开始，均值大约40，到episode 800时均值约380
 奖励收敛曲线呈上升趋势
 
 ## 运行方法
