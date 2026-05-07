@@ -1,10 +1,42 @@
+# DQN CartPole-v3
+
+## 这个项目是什么
+### 小车倒立摆：
+小车在不断的左右移动然后学习让杆保持竖直
+
+## 我学到了什么
+1.不断地试错，积累经验，才会减少失败。
+2.解决中文乱码的问题，还有绘制奖励收敛曲线
+3.让小车不断地学习寻找对策
+
+## 核心模块<img width="2880" height="1920" alt="Cartpole-v2" src="https://github.com/user-attachments/assets/99c1d357-de4e-4c72-bc35-f793f336c6a8" />
+<img width="604" height="460" alt="Screenshot 2026-05-07 124015" src="https://github.com/user-attachments/assets/92b5145d-c498-4760-8696-aea54ec3b3de" />
+<img width="2004" height="1334" alt="Screenshot 2026-05-07 112039" src="https://github.com/user-attachments/assets/7f57808c-f4ed-46f5-8e2a-b864e259c573" />
+
+- CartPole-v3.py：核心程序，负责调用其他库
+- train_target.py：辅助cartpole实现
+- ReplayBuffer.py：经验回收池，更新积累经验
+- dqn_v0.py：策略选择等等
+
+## 收敛结果<img width="516" height="576" alt="Screenshot 2026-05-07 125110" src="https://github.com/user-attachments/assets/163b19be-bc3e-4a6b-aa83-fd3360bb6e75" />
+<img width="516" height="576" alt="Screenshot 2026-05-07 125110" src="https://github.com/user-attachments/assets/805a9091-2af1-40e6-9dda-7b3c1e6ed892" />
+<img width="2880" height="1920" alt="Screenshot 2026-05-06 114520" src="https://github.com/user-attachments/assets/c154bc5b-a49f-4108-884c-c2406d9b25c1" />
+
+奖励收敛曲线呈上升趋势
+
+## 运行方法
+下载代码包后解压，在代码平台打开后点击运行就可以了
+```
+pip install gymnasium torch numpy matplotlib
+python CartPole-v1.py
+```
 # 🧊 Q-Learning FrozenLake | 冰糕找食物
 
 > 你见过一个完全不会认路的小人，踩着薄薄的冰面，摔进冰洞一千次，爬出来一千次，最后靠着一身淤青摸出那条最短的路、绕开所有的冰洞吗？
 >
 > 冬天快来了，他必须找到食物，没有退路。
 >
-> 我们叫他**【冰糕】**。他跟你以后要做的机器人一模一样——没有地图，没有人教，只能自己在未知的冰湖上一步一步试，摔了记住，爬起来接着走，直到走出那条最优的路。
+> 我们叫他**【冰糕】**。他跟你以后要做的机器人一模一样——没有地图，没有人教，只能自己在未知的冰湖上一步一步试，摔了记住，爬起来接着走，直到走出那条最优的路。   
 
 ---
 
