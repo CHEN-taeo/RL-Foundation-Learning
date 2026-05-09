@@ -1,240 +1,93 @@
-# DQN CartPole-v1
 
-## 这个项目是什么
-### 小车倒立摆：
-小车在不断的左右移动然后学习让杆保持竖直
+## 开篇:我遇到的问题
 
-## 我学到了什么
-1.不断地试错，积累经验，才会减少失败。
-2.解决中文乱码的问题，还有绘制奖励收敛曲线
-3.让小车不断地学习寻找对策
+我身处在一个AI盛行的时代，身边的人都说，不会用AI将来将会被淘汰。所以我整个的但智能体强化学习都是利用豆包和Claude帮助我一步步学习的。Claude可以帮助我明确方向，同时在我拖延与偏离的时候拉回我。然后是豆包，利用它的专家模式一步步学会这些困难的问题。
+但是当我开始写这篇文章的时候，我发现我是最后才弄懂Q-Learning与DQN之间到底有什么区别。也遇到一些问题。在开始新篇章DQN的时候，我还是带着原来的Q-Learning思维，在用到的代码中都会加上一个Q_table.但是每次都会被豆包批评。然后我就不再纠结，虽然有很多一些基础性的知识我都会问豆包 。但是这没关系。与我喜欢的一部动漫的主人公一样简单的挥拳都会挥上100完次。直到我写完DQN（CartPole-v1)并看到小车倒立摆的游戏的时候，我才意识到为什么使用DQN。但是这些都不是问题，问题在于我今天在写这篇文章的时候，才知道两者的区别。
 
-## 核心模块<img width="2880" height="1920" alt="Cartpole-v2" src="https://github.com/user-attachments/assets/99c1d357-de4e-4c72-bc35-f793f336c6a8" />
-<img width="604" height="460" alt="Screenshot 2026-05-07 124015" src="https://github.com/user-attachments/assets/92b5145d-c498-4760-8696-aea54ec3b3de" />
-<img width="2004" height="1334" alt="Screenshot 2026-05-07 112039" src="https://github.com/user-attachments/assets/7f57808c-f4ed-46f5-8e2a-b864e259c573" />
-
-- CartPole-v1.py：核心程序，负责调用其他库
-- train_target.py：辅助cartpole实现
-- ReplayBuffer.py：经验回收池，更新积累经验  
-- dqn_v0.py：策略选择等等
-
-## 收敛结果<img width="516" height="576" alt="Screenshot 2026-05-07 125110" src="https://github.com/user-attachments/assets/163b19be-bc3e-4a6b-aa83-fd3360bb6e75" />
-<img width="516" height="576" alt="Screenshot 2026-05-07 125110" src="https://github.com/user-attachments/assets/805a9091-2af1-40e6-9dda-7b3c1e6ed892" />
-<img width="2880" height="1920" alt="Screenshot 2026-05-06 114520" src="https://github.com/user-attachments/assets/c154bc5b-a49f-4108-884c-c2406d9b25c1" />
-从episode 100开始，均值大约40，到episode 800时均值约380
-奖励收敛曲线呈上升趋势
-
-## 运行方法
-下载代码包后解压，在代码平台打开后点击运行就可以了
-```
-pip install gymnasium torch numpy matplotlib
-python CartPole-v1.py
-```
-# 🧊 Q-Learning FrozenLake | 冰糕找食物
-
-> 你见过一个完全不会认路的小人，踩着薄薄的冰面，摔进冰洞一千次，爬出来一千次，最后靠着一身淤青摸出那条最短的路、绕开所有的冰洞吗？
->
-> 冬天快来了，他必须找到食物，没有退路。
->
-> 我们叫他**【冰糕】**。他跟你以后要做的机器人一模一样——没有地图，没有人教，只能自己在未知的冰湖上一步一步试，摔了记住，爬起来接着走，直到走出那条最优的路。   
+> [!NOTE]
+> 我一直以为，状态越多越难。但 FrozenLake 有 16 个状态，Q-Learning 轻松跑通；CartPole 只有 4 个状态，Q-Learning 却完全用不了。这个矛盾困扰了我很久，直到今天我才真正想明白。
 
 ---
 
-## 📌 一句话简介
+## 一、卡死我的核心难题：维数灾难
 
-**【冰糕】** 在一次次摔进冰洞的失败中总结经验，最终找到最优路线，囤够食物度过冬天。
+1. 一句话说清楚：什么是维数灾难？
+	1. 维数灾难：在智能体的场景中，每增加一个状态维度就会导致状态数量的指数级爆炸。简单来说就是：牵一发以动全身。
+		如果我硬要把cartpole的4个连续的状态离散化，每个维度拆成100个区间，总状态数就是100^4=1亿个，Q表大小就是1^2亿=2亿个单元格。我的笔记本电脑内存只有16GB，根本存不了这么大的表格，更别说什么更新。
+	2. 状态维度：用来完整描述智能体当前状态的【独立特征数量】
+	3. 在FrozenLake-v1中是4✖️4网格，一个格子对应一个状态。我们描述智能体当前的状态只需要一个独立特征（当前在哪一个格子）（0-15号），所以状态维度为1。在另一个项目CartPole-v1中，状态维度为4.（1.小车的水平位置。2.杆摆动的角速度。3.小车的移动速度。4.杆子偏离竖直方向的角度）。
+	4. Q-learning更像是一张Excel表格，只能存储有限的数据。同时在每个状态的时候要查看表格，根据表中的方法来决策。然而DQN通过输入当前的状态，再通过一些函数等等计算得出决策后执行动作，可以处理更多的数据与状态。
+2. 为什么 FrozenLake 能用 Q-Learning 跑通，CartPole 不行？
+	1. 因为CartPole的状态是连续实数，理论上有无限个状态，根本无法枚举。而Q-learning的状态是离散的，有限的，可枚举的。这是“有限”与“无限”的本质区别。
+	2. Q-Learning：
+  ```
+  q_table=np.zeros([5,3])  
+  q_table[1]=[0.1,0.9,0.5]
+  ```
 
-这是一个基于 **Q-Learning** 算法、在 `FrozenLake-v1` 环境中训练单智能体的完整项目，包含训练循环、调参实验与结果可视化。
-
----
-
-## 🛠️ 环境准备
-
-**Python 版本：3.13（亲测有效）**
-
-安装依赖：
-
-```bash
-pip install numpy gymnasium matplotlib
-```
-
-建议使用虚拟环境，避免和其他项目的库冲突：
-
-```bash
-# 创建虚拟环境
-python -m venv q_learning_env
-
-# Windows 激活
-q_learning_env\Scripts\activate
-
-# Mac/Linux 激活
-source q_learning_env/bin/activate
-```
 
 ---
 
-## 🚀 快速开始
+## 二、两条完全不同的路：查表 vs 拟合
+### 第一张图：Q-Learning = 一张 Excel 查分表
+#### Q-Learning的核心是提前存储每个状态的Q值，遇到状态直接查表。
+#### 本质是“死记硬背”
 
-```bash
-# 1. 克隆项目
-git clone https://github.com/CHEN-taeo/RL-Foundation-Learning.git
+![[Screenshot 2026-05-07 125110 1.png|242]]
 
-# 2. 进入目录
-cd RL-Foundation-Learning
 
-# 3. 安装依赖
-pip install numpy gymnasium matplotlib
+![[Q-Learning（FrozenLake-v1）.png|247]]
 
-# 4. 运行训练
-python q_learning_loop.py
-```
+### 第二张图：DQN(CartPole-v1)=一个黑盒子函数
+#### DQN的核心是学习一个输入状态、输出Q值的函数，不需要提前存储所有状态。
 
-运行后你会看到训练过程的打印输出，以及最终的 reward 曲线图。
+![[LEARNING.png|532]]
 
----
+--- 
+## 函数逼近：从“死记硬背”到“学会规律”
+### DQN 用什么方法，解决了 Q-Learning 解决不了的维数灾难问题？
+####  通过函数逼近计算，通过每一个状态来相应的计算每一次的输出。
 
-## 🧠 核心原理
-
-### Q 表是什么？
-
-Q 表就是**冰糕脑子里的「冰湖地图经验之书」**——
-
-- 每一行对应冰湖的一个格子（状态）
-- 每一列对应一个动作（上下左右）
-- 格子里的数字是冰糕对「走这步能拿到多少奖励」的预估
-
-一开始全是 0，什么都不知道；摔了一千次之后，这本书就变成了最优路线图。
-
-### 贝尔曼更新：冰糕怎么从失败里学习？
-
-```python
-Q_table[state, action] += alpha * (
-    reward + gamma * np.max(Q_table[next_state, :]) - Q_table[state, action]
-)
-```
-
-五步拆解：
-
-| 步骤 | 公式片段 | 白话解释 |
-|------|----------|----------|
-| ① 预测未来 | `np.max(Q_table[next_state, :])` | 下一步最多能拿多少奖励 |
-| ② 折现处理 | `gamma * ...` | 未来的奖励打个折，不如现在的确定（一鸟在手）|
-| ③ 算总收益 | `reward + gamma * ...` | 现在的奖励 + 打折后的未来奖励 |
-| ④ 算误差 | `总收益 - Q_table[state, action]` | 新估计 vs 旧记录，差了多少 |
-| ⑤ 渐进更新 | `alpha * 误差` | 用学习率控制更新幅度，别一次改太猛 |
-
-> **本质**：冰糕不是靠运气找到路的，是靠「预测 → 验证 → 修正」的闭环，把经验一点点写进 Q 表里。
-
----
-
-## ⚙️ 超参数说明
-
-```python
-alpha   = 0.1    # 学习率：每次更新信任多少新经验（10%）
-gamma   = 0.9    # 折扣因子：有多看重未来的奖励
-epsilon = 0.1    # 探索率：以多大概率随机试新动作
-max_episodes          = 1000  # 总训练轮数
-max_step_per_episode  = 100   # 每轮最多走多少步
-```
-
-ε-greedy 策略：
-
-- `rand < epsilon` → 随机探索（试新路）
-- `rand >= epsilon` → 贪心利用（走 Q 表里最好的路）
-- `epsilon` 随训练轮数衰减（`× 0.995`，最低降到 `0.01`）
-
----
-
-## 🔬 调参实验结论
-
-### 实验 1：学习率 alpha 的影响
-
-测试值：`0.01 / 0.05 / 0.1 / 0.2 / 0.5`
-
-| alpha | 收敛速度 | 后期稳定性 |
-|-------|----------|------------|
-| 小（0.01） | 慢 | 稳 |
-| 大（0.5） | 快 | 抖 |
-
-**结论：alpha 越大收敛越快，但后期波动越大；alpha 越小越稳，但要等更久。**
-
----
-
-### 实验 2：折扣因子 gamma 的影响
-
-测试值：`0.5 / 0.8 / 0.9 / 0.95 / 0.99`
-
-| gamma | 智能体性格 | 表现 |
-|-------|------------|------|
-| 接近 0 | 短视，只顾眼前 | 容易陷入局部最优 |
-| 接近 1 | 有远见，愿意走长路绕障碍 | reward 上限更高 |
-
-**结论：gamma 越接近 1，冰糕越愿意多走几步绕开冰洞，最终路线质量越高。**
-
----
-
-### 实验 3：探索策略 epsilon 的影响
-
-三种策略对比：
-
-| 策略 | 描述 | 结果 |
-|------|------|------|
-| 固定 0.01 | 几乎不探索，只走熟悉的路 | 容易卡在局部最优，学不好 |
-| 固定 0.2 | 一直乱试 | 收敛极慢，波动极大 |
-| **衰减策略** | 从 0.1 开始，慢慢降到 0.01 | **收敛最快、reward 最高、最稳定** |
-
-**结论：先大胆探索，再稳定利用——衰减策略完胜。**
-
----
-
-## 📊 训练结果
-
-训练 1000 轮后的 reward 曲线：
-
-![训练结果](q_learning_frozenlake.png)
-
-红线为每 100 个 episode 的滑动平均，可以清晰看到冰糕从「乱撞」到「找到最优路线」的学习过程。
-
----
-
-## 📁 项目结构
 
 ```
-RL-Foundation-Learning/
-├── q_learning_loop.py          # 主训练脚本（带完整注释）
-├── q_learning_frozenlake.png   # 训练结果曲线图
-├── code/
-│   ├── Q-table.py              # ε-greedy 策略实现
-│   ├── Q_learning_update.py    # 贝尔曼更新公式实现
-│   ├── FrozenLake_v1.py        # Gymnasium 基础交互演示
-│   ├── marl_demo.py            # PettingZoo 多智能体演示
-│   └── daily_note/
-│       ├── day1_understanding_of_Five-Tuple.md
-│       ├── Q_table.md
-│       └── Q_learning_update.md
-└── README.md
+	class SimpleDQN(nn.Module): def __init__(self): 
+	super().__init__() 
+	self.fc1 = nn.Linear(4, 128) # 输入层：4个状态 
+	self.fc2 = nn.Linear(128, 128) # 隐藏层 
+	self.fc3 = nn.Linear(128, 2) # 输出层：2个动作的Q值 
+	def forward(self, x): 
+	x = torch.relu(self.fc1(x)) 
+	x = torch.relu(self.fc2(x)) 
+	x = self.fc3(x) return x
 ```
+#### 同时不需要存储所有状态，就能输出Q值。
+ 代码中如何使用函数逼近？
+定义网络（逼近器）：
+```
+online_net = SimpleDQN()  # 创建在线网络，输入4个状态，输出2个Q值
+target_net = SimpleDQN()  # 目标网络，稳定训练
+```
+SimpleDQN是nn.Module子类，里面有全连接层（fc1, fc2, fc3），这就是逼近函数：f(state) ≈ Q_values。
+预测Q值（利用逼近）：
+```
+def epsilon_greedy_action(online_net, state, epsilon, n_actions):
+    state_tensor = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
+    with torch.no_grad():
+        q_value = online_net(state_tensor)  # 网络逼近：输入状态，输出[ Q_left, Q_right ]
+    action = q_value.argmax(dim=1).item()  # 选Q值最大的动作
+    # ... 然后epsilon判断是否探索
+```
+这里用网络“逼近”Q值：给状态，网络算出Q_left和Q_right。不是查表，是算出来的近似值。
 
----
+> 问题：传统Q-learning用表格存Q值（每个状态-动作对一个值），但如果状态空间大（比如连续的，如小车位置无限），表格存不下（内存爆炸）。
+解决方案：用函数逼近！用一个模型（通常神经网络）来“猜”Q值：输入状态，输出所有动作的Q值。不用存所有，算出来。
+比喻：表格像字典，存每个词的解释。但词太多，存不下。你训练一个AI模型（函数），输入词，输出解释——逼近字典的功能。
 
-## 🗓️ 更新记录
+**我的 SimpleDQN 网络只有 `4×128 + 128×128 + 128×2 = 17024` 个可训练参数。只用这 1.7 万个参数，就能拟合出 CartPole 无限个状态对应的 Q 值，这就是函数逼近的魔力。**
 
-| 日期 | 内容 |
-|------|------|
-| 2026.04.13 | 新增 `marl_demo.py`，跑通 PettingZoo MPE 追逐环境 |
-| 2026.04.14 | 新增 `FrozenLake_v1.py`，完成 Gymnasium 基础交互循环 |
-| 2026.04.14 | 归档环境搭建笔记与 Day1 五元组理解 |
-| 2026.04.15 | 新增 `Q-table.py`，实现 ε-greedy 策略及完整测试脚本 |
-| 2026.04.16 | 新增 `Q_learning_update.py`，完成贝尔曼更新公式代码落地 |
-| 2026.04.17 | 完成完整 Q-learning 训练循环，加入调参实验与可视化 |
-| 2026.04.18 | 整理 README，归档调参实验核心结论 |
-
----
-
-## 👤 作者
-
-**陈韬** · 东华大学机械工程 2025 级
-
-长期目标：多智能体强化学习 × 具身智能 × 机器人/汽车科技
-
-> 这是 RL 地基学习计划的第一个完整闭环项目。两周目标：独立手写 DQN，让 CartPole 稳定收敛。
+--- 
+## 结尾：我的复盘与下一步
+  这次深度思考，让我收获了许多，最大的收获就是理解了Q-Learning与DQN的区别，方便我以后应用这两个方法。
+  之前是“跑通了代码”，现在终于理解原来代码之间可以有这么多的讲究。比如未来折扣，探索概率等等。这些是我以前没有考虑过的。但是现在给我更多的想法与见解。
+  说到训练CartPole时，奖励回退问题。我想原因在于前期的时候，多探索确实可以提升奖励值，但是在 利用时，选择的最大奖励值的动作可能存在偏差，使奖励下跌。就是我们说的奖励回退现象。
+  接下来我要学习的连续动作控制算法（PPO），不能用DQN直接做，因为DQN的输出是有限的，无法应对无限个连续动作的情况。
