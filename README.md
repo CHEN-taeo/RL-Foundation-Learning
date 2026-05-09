@@ -33,20 +33,24 @@
 #### Q-Learning的核心是提前存储每个状态的Q值，遇到状态直接查表。
 #### 本质是“死记硬背”
 
-![[Screenshot 2026-05-07 125110 1.png|242]]
+<img width="514" height="572" alt="Screenshot 2026-05-07 125110" src="https://github.com/user-attachments/assets/22e1b907-5266-4b5f-b823-8515a1d66d04" />
+<img width="1024" height="1024" alt="Q-Learning（FrozenLake-v1）" src="https://github.com/user-attachments/assets/93a8ebb8-819b-4936-8d75-dff33531aa00" />
 
-
-![[Q-Learning（FrozenLake-v1）.png|247]]
 
 ### 第二张图：DQN(CartPole-v1)=一个黑盒子函数
 #### DQN的核心是学习一个输入状态、输出Q值的函数，不需要提前存储所有状态。
 
-![[LEARNING.png|532]]
+<img width="604" height="460" alt="Screenshot 2026-05-07 124015" src="https://github.com/user-attachments/assets/19ec3f95-da8b-4be1-9c83-e9cfb74c622b" />
+<img width="2004" height="1334" alt="Screenshot 2026-05-07 112039" src="https://github.com/user-attachments/assets/fafd5820-cde2-4903-891e-fbadaddc588d" />
+ <img width="2731" height="1535" alt="LEARNING" src="https://github.com/user-attachments/assets/13e3afbb-2a0a-456d-a787-23d9662d1837" />
+
+
 
 --- 
 ## 函数逼近：从“死记硬背”到“学会规律”
 ### DQN 用什么方法，解决了 Q-Learning 解决不了的维数灾难问题？
 ####  通过函数逼近计算，通过每一个状态来相应的计算每一次的输出。
+
 
 
 ```
