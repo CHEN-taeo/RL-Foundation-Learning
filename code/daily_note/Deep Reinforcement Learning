@@ -1,0 +1,40 @@
+
+1. 一句话说清楚：什么是维数灾难？
+	1. 维数灾难：在Q-learning情况下，每多增加一个状态维度，就会导致总状态数成指数级爆炸。
+	2. 状态维度：用来完整描述智能体当前状态的【独立特征数量】
+	3. 在我写的FrozenLake-v1中是4✖️4网格，一个格子对应一个状态。但是我们描述智能体当前的状态只需要一个独立特征（当前在哪一个格子）（0-15号），所以状态维度为1。在另一个项目CartPole-v1中，状态维度为4.（1.小车的水平位置。2.杆摆动的角速度。3.小车的移动速度。4.杆子偏离竖直方向的角度）。但是在Q-learning中，更像是一张Excel表格，只能存储有限的数据。同时在每个状态的时候要查看表格，根据表中的方法来决策。然而在DQN中是通过输入当前的状态，再通过一些函数等等计算得出决策后执行动作，可以处理更多的数据与状态。
+2. 为什么 FrozenLake 能用 Q-Learning 跑通，CartPole 不行？
+	1. 因为CartPole的状态是连续实数，理论上有无限个状态，根本无法枚举。而Q-learning的状态是离散的，有限的，可枚举的。这是“有限”与“无限”的本质区别。
+	2. Q-Learning：
+  ```
+  q_table=np.zeros([5,3])  
+  q_table[1]=[0.1,0.9,0.5]
+  ```
+3. DQN 用什么方法，解决了 Q-Learning 解决不了的维数灾难问题？
+	1. 通过函数逼近计算，通过每一个状态来相应的计算每一次的输出。
+```
+	class SimpleDQN(nn.Module): def __init__(self): 
+	super().__init__() 
+	self.fc1 = nn.Linear(4, 128) # 输入层：4个状态 
+	self.fc2 = nn.Linear(128, 128) # 隐藏层 
+	self.fc3 = nn.Linear(128, 2) # 输出层：2个动作的Q值 
+	def forward(self, x): 
+	x = torch.relu(self.fc1(x)) 
+	x = torch.relu(self.fc2(x)) 
+	x = self.fc3(x) return x
+```
+
+
+
+## 第一张图：Q-Learning = 一张 Excel 查分表
+
+![[Screenshot 2026-05-07 125110 1.png|242]]
+
+
+![[Q-Learning（FrozenLake-v1）.png|247]]
+#### Q-Learning的核心是提前存储每个状态的Q值，遇到状态直接查表。
+
+## 第二张图：DQN(CartPole-v1)=一个黑盒子函数
+
+![[LEARNING.png|532]]
+#### DQN的核心是学习一个输入状态、输出Q值的函数，不需要提前存储所有状态。
