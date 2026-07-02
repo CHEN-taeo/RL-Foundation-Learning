@@ -1,0 +1,22 @@
+import torch.nn as nn
+class QNetwork(nn.Module):
+    def __init__(self,obs_dim,action_dim,hidden_dim=64):
+        super().__init__()
+        self.fc1 = nn.Linear(obs_dim,hidden_dim)    # 第一层：输入4个数——>中间64个数
+        self.relu = nn.ReLU()   # 掰弯的开关：负数直接归零，正数原样通过
+        self.fc2 = nn.Linear(hidden_dim,action_dim) #第二层：中间64个数——>最终2个数
+        # nn（neural network(神经网络)）,obs(observation(观测）），dim(dimension(维度））
+        # Linear（线性）
+
+        """
+        PyTorch 构建2*4的权重矩阵和长度为2的偏置向量，
+        全部初始化成随机小数（这些随机数就是训练过程里会被不断调整的东西）
+        """
+    def forward(self,x):
+        '''
+        forward不是"描述"计算，是"执行"计算，执行的同时pytorch自动记账，这本账是后面训练能成立的全部前提
+        '''
+        x = self.fc1(x)
+        x = self.relu(x)
+        x = self.fc2(x)
+        return x   # fc(fully connected)全连接层，输入x，输出经过fc的结果
